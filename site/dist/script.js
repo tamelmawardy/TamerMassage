@@ -450,24 +450,70 @@ function drawGiftCertificate({ to, from }) {
 }
 
 if (giftCertificateForm) {
-  giftCertificateForm.addEventListener('submit', async (event) => {
+  const giftResult = document.querySelector('[data-gift-result]');
+  const giftImage = giftResult?.querySelector('[data-gift-image]');
+  const giftDownload = giftResult?.querySelector('[data-gift-download]');
+  const giftShare = giftResult?.querySelector('[data-gift-share]');
+  let giftFile = null;
+  let giftUrl = null;
+
+  // Warm the two faces used on the certificate so the canvas never falls back
+  // to Arial when someone fills the form a second after landing.
+  if (document.fonts?.load) {
+    document.fonts.load('700 74px "Prata"').catch(() => {});
+    document.fonts.load('600 34px "Manrope"').catch(() => {});
+  }
+
+  const resetGiftFile = () => {
+    if (giftUrl) URL.revokeObjectURL(giftUrl);
+    giftUrl = null;
+    giftFile = null;
+    if (giftDownload) giftDownload.hidden = true;
+    if (giftShare) giftShare.hidden = true;
+  };
+
+  giftCertificateForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const data = new FormData(giftCertificateForm);
     const to = String(data.get('to') || '').trim().slice(0, 40);
     const from = String(data.get('from') || '').trim().slice(0, 40);
-    try { await document.fonts.ready; } catch { /* Fall back to system fonts. */ }
     const canvas = drawGiftCertificate({ to, from });
+
+    // Show the picture first: in-app browsers (Telegram, Instagram) and iOS
+    // Safari block programmatic downloads, but a visible image can always be
+    // saved with a long press.
+    resetGiftFile();
+    if (giftImage) giftImage.src = canvas.toDataURL('image/png');
+    if (giftResult) {
+      giftResult.hidden = false;
+      giftResult.focus({ preventScroll: true });
+      giftResult.scrollIntoView({
+        block: 'nearest',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+      });
+    }
+
     canvas.toBlob((blob) => {
       if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'tamer-gift-certificate.png';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+      giftFile = new File([blob], 'tamer-gift-certificate.png', { type: 'image/png' });
+      giftUrl = URL.createObjectURL(blob);
+      if (giftDownload) {
+        giftDownload.href = giftUrl;
+        giftDownload.hidden = false;
+      }
+      if (giftShare && navigator.canShare) {
+        try {
+          if (navigator.canShare({ files: [giftFile] })) giftShare.hidden = false;
+        } catch { /* Sharing stays hidden. */ }
+      }
     }, 'image/png');
+  });
+
+  giftShare?.addEventListener('click', async () => {
+    if (!giftFile) return;
+    try {
+      await navigator.share({ files: [giftFile], title: translate('Подарочный сертификат') });
+    } catch { /* The visitor cancelled or the share sheet failed. */ }
   });
 }
 
