@@ -233,6 +233,18 @@ body.lightbox-open { overflow: hidden; }
 .gift-card-link span { transition: transform .2s ease; }
 .gift-card-link:hover span { transform: translate(2px, -2px); }
 .gift-note { margin: 22px 0 0; color: var(--muted); font-size: .74rem; letter-spacing: .04em; }
+.gift-certificate { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-top: 26px; padding: 30px 34px; border: 1px solid var(--line); border-radius: 22px; background: var(--paper); }
+.gift-certificate-copy .eyebrow { margin-bottom: 12px; }
+.gift-certificate-copy h3 { margin: 0 0 8px; font-family: "Prata", Georgia, serif; font-size: 1.5rem; font-weight: 400; }
+.gift-certificate-copy p:not(.eyebrow) { margin: 0; max-width: 420px; color: var(--muted); font-size: .9rem; line-height: 1.55; }
+.gift-certificate-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gift-certificate-form label { display: grid; gap: 6px; color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.gift-certificate-form input { width: 100%; min-height: 46px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--cream); color: var(--ink); font: inherit; font-size: .92rem; letter-spacing: normal; text-transform: none; }
+.gift-certificate-form input:focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
+.gift-certificate-form .button { grid-column: 1 / -1; min-height: 48px; }
+html[dir="rtl"] .gift-certificate-form label { text-align: right; }
+html[data-theme="dark"] .gift-certificate { background: rgba(255, 255, 255, .03); }
+html[data-theme="dark"] .gift-certificate-form input { background: var(--paper); }
 html[dir="rtl"] .gift-card-foot strong { text-align: right; }
 html[data-theme="dark"] .gift-card { border-color: rgba(169, 204, 130, .45); }
 html[data-theme="dark"] .gift-card-link { color: var(--forest-deep); background: var(--lime); }
@@ -401,11 +413,13 @@ html.has-js [data-reveal].is-revealed { opacity: 1; transform: none; }
   .review-lightbox-image { max-height: calc(100vh - 128px); }
   .quick-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; gap: 10px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--paper); border-top: 1px solid var(--line); box-shadow: 0 -12px 30px rgba(9, 43, 32, .1); transform: translateY(115%); transition: transform .3s ease; }
   .quick-actions.is-visible { transform: none; }
-  .quick-actions-btn { flex: 1; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; font-size: .92rem; font-weight: 700; text-decoration: none; }
+  .quick-actions-btn { flex: 1; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-size: .85rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .quick-actions-btn svg { width: 17px; height: 17px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .quick-actions-call { color: var(--ink); border: 1px solid var(--line); background: var(--paper); }
   .quick-actions-telegram { color: white; background: var(--forest); }
+  .quick-actions-whatsapp { color: var(--forest-deep); background: var(--lime); }
   html[data-theme="dark"] .quick-actions-telegram { color: var(--forest-deep); background: var(--lime); }
+  html[data-theme="dark"] .quick-actions-whatsapp { color: var(--forest-deep); background: #e5efc5; }
   body.quick-actions-visible { padding-bottom: 80px; }
   html[dir="rtl"] .hero-visual { padding: 0 0 30px 12px; }
   html[dir="rtl"] .hero-note { right: -20%; left: auto; }
@@ -441,6 +455,8 @@ html.has-js [data-reveal].is-revealed { opacity: 1; transform: none; }
   .gift-card { padding: 22px 22px 18px; }
   .gift-card h3 { font-size: 1.25rem; }
   .gift-note { margin-top: 16px; font-size: .7rem; }
+  .gift-certificate { grid-template-columns: 1fr; gap: 22px; padding: 24px 20px; }
+  .gift-certificate-form { grid-template-columns: 1fr; }
   .quiz-head { grid-template-columns: 1fr; gap: 14px; }
   .quiz-intro { max-width: none; }
   .quiz-panel { margin-top: 32px; padding: 26px 18px 30px; border-radius: 20px; }

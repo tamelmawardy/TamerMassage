@@ -308,6 +308,11 @@ const giftMessages = {
   en: (name, price) => `Hello, Tamer! I would like to gift a certificate “${name}” (${price}).`,
   ar: (name, price) => `مرحباً تامر! أرغب في إهداء شهادة «${name}» (${price}).`
 };
+const whatsappMessages = {
+  ru: 'Здравствуйте, Тамер! Хочу записаться на массаж.',
+  en: 'Hello, Tamer! I would like to book a massage.',
+  ar: 'مرحباً تامر! أرغب في حجز جلسة تدليك.'
+};
 function updateServiceLinks() {
   const language = document.documentElement.lang || 'ru';
   const build = serviceMessages[language] || serviceMessages.ru;
@@ -324,9 +329,147 @@ function updateServiceLinks() {
     const price = card?.querySelector('strong')?.textContent.trim() || '';
     link.href = `https://t.me/Tamelmawardy?text=${encodeURIComponent(buildGift(name, price))}`;
   });
+  const whatsappText = whatsappMessages[language] || whatsappMessages.ru;
+  document.querySelectorAll('[data-whatsapp]').forEach((link) => {
+    link.href = `https://wa.me/79818554031?text=${encodeURIComponent(whatsappText)}`;
+  });
 }
 window.updateServiceLinks = updateServiceLinks;
 updateServiceLinks();
+
+// Gift certificate: draw a 1600x1000 PNG in the current language so the buyer
+// can download it and send it to the person they are treating.
+const giftCertificateForm = document.querySelector('[data-gift-certificate]');
+
+function fitCanvasText(ctx, text, x, y, maxWidth, startSize, family, weight = '400') {
+  let size = startSize;
+  do {
+    ctx.font = `${weight} ${size}px ${family}`;
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size -= 2;
+  } while (size > 16);
+  ctx.fillText(text, x, y);
+}
+
+function drawGiftCertificate({ to, from }) {
+  const rtl = document.documentElement.dir === 'rtl';
+  const canvas = document.createElement('canvas');
+  canvas.width = 1600;
+  canvas.height = 1000;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const forest = '#123d2d';
+  const cream = '#f7f5ec';
+  const lime = '#d8e6a4';
+  const muted = '#5f6d60';
+  const sans = '"Manrope", Arial, sans-serif';
+  const serif = rtl ? sans : '"Prata", Georgia, serif';
+  // Arabic reads right to left, so brand, footer and seal mirror to the right.
+  const mirror = (x) => (rtl ? W - x : x);
+  const side = rtl ? 'right' : 'left';
+
+  ctx.fillStyle = cream;
+  ctx.fillRect(0, 0, W, 1000);
+  ctx.strokeStyle = forest;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(36, 36, W - 72, 928);
+  ctx.strokeStyle = 'rgba(18, 61, 45, .22)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(54, 54, W - 108, 892);
+
+  // Brand mark
+  ctx.fillStyle = forest;
+  ctx.beginPath();
+  ctx.arc(mirror(126), 126, 42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = cream;
+  ctx.direction = 'ltr';
+  ctx.font = '700 46px "Prata", Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(rtl ? 'ت' : 'Т', mirror(126), 130);
+
+  ctx.direction = rtl ? 'rtl' : 'ltr';
+  ctx.textAlign = side;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = forest;
+  ctx.font = `700 34px ${serif}`;
+  ctx.fillText(translate('Тамер'), mirror(190), 120);
+  ctx.fillStyle = muted;
+  ctx.font = `600 17px ${sans}`;
+  ctx.fillText(translate('массаж & восстановление'), mirror(190), 148);
+
+  // Title
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#557536';
+  ctx.font = `700 26px ${sans}`;
+  const kicker = translate('Подарочный сертификат');
+  ctx.fillText(rtl ? kicker : kicker.toUpperCase(), W / 2, 300);
+
+  ctx.fillStyle = forest;
+  fitCanvasText(ctx, translate('На сеанс массажа'), W / 2, 400, 1100, 74, serif);
+
+  ctx.fillStyle = lime;
+  ctx.fillRect(W / 2 - 100, 442, 200, 4);
+
+  // Names
+  ctx.fillStyle = forest;
+  if (to) fitCanvasText(ctx, `${translate('Кому')}: ${to}`, W / 2, 545, 1100, 34, sans);
+  if (from) fitCanvasText(ctx, `${translate('От кого')}: ${from}`, W / 2, 600, 1100, 34, sans);
+
+  // Footer
+  ctx.textAlign = side;
+  ctx.fillStyle = muted;
+  ctx.font = `400 22px ${sans}`;
+  ctx.fillText(translate('Действует 6 месяцев'), mirror(120), 840);
+  ctx.direction = 'ltr';
+  ctx.fillStyle = forest;
+  ctx.font = `700 30px ${sans}`;
+  ctx.fillText('+7 981 855-40-31', mirror(120), 886);
+  ctx.direction = rtl ? 'rtl' : 'ltr';
+  ctx.fillStyle = muted;
+  ctx.font = `400 20px ${sans}`;
+  ctx.fillText(translate('Санкт-Петербург'), mirror(120), 922);
+
+  // Seal
+  ctx.strokeStyle = '#b7cf7a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(mirror(1400), 840, 96, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.direction = 'ltr';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = forest;
+  ctx.font = '400 56px "Prata", Georgia, serif';
+  ctx.fillText('12+', mirror(1400), 832);
+  ctx.fillStyle = muted;
+  ctx.font = `600 16px ${sans}`;
+  ctx.fillText(translate('лет заботы'), mirror(1400), 872);
+
+  return canvas;
+}
+
+if (giftCertificateForm) {
+  giftCertificateForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const data = new FormData(giftCertificateForm);
+    const to = String(data.get('to') || '').trim().slice(0, 40);
+    const from = String(data.get('from') || '').trim().slice(0, 40);
+    try { await document.fonts.ready; } catch { /* Fall back to system fonts. */ }
+    const canvas = drawGiftCertificate({ to, from });
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'tamer-gift-certificate.png';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }, 'image/png');
+  });
+}
 
 // Keep thousands groups together in right-to-left layouts: with a regular
 // space the browser treats "3 500" as two runs and reorders them in Arabic.

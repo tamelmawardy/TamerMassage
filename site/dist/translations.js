@@ -131,6 +131,16 @@ const translationRows = [
   ['Выбрать', 'Choose', 'اختر'],
   ['Действует 6 месяцев · оформляется в Telegram', 'Valid for 6 months · arranged in Telegram', 'صالحة لمدة 6 أشهر · تُطلب عبر تيليجرام'],
   ['лет заботы', 'years of care', 'عاماً من العناية'],
+  ['Скачайте готовый сертификат', 'Download a ready certificate', 'حمّل شهادة جاهزة'],
+  ['Подарок за пару минут', 'A gift in a couple of minutes', 'هدية خلال دقائق'],
+  ['Впишите имена — и отправьте картинку тому, кого хотите порадовать.', 'Add the names and send the image to the person you want to treat.', 'أضف الأسماء وأرسل الصورة إلى من تريد إسعاده.'],
+  ['Кому', 'To', 'إلى'],
+  ['От кого', 'From', 'من'],
+  ['Имя', 'Name', 'الاسم'],
+  ['Скачать сертификат', 'Download certificate', 'تحميل الشهادة'],
+  ['На сеанс массажа', 'For a massage session', 'لجلسة تدليك'],
+  ['Действует 6 месяцев', 'Valid for 6 months', 'صالحة لمدة 6 أشهر'],
+  ['Санкт-Петербург', 'St Petersburg', 'سانت بطرسبرغ'],
   ['о движении', 'for movement', 'بالحركة'],
   ['Индивидуальная работа с телом', 'Bodywork tailored to you', 'عناية بالجسم تناسبك'],
   ['Тамер — на главную', 'Tamer — home', 'تامر — الصفحة الرئيسية'],
@@ -205,8 +215,8 @@ while (walker.nextNode()) {
   }
 }
 const translatedAttributes = [];
-document.querySelectorAll('[aria-label], img[alt], meta[name="description"]').forEach((element) => {
-  ['aria-label', 'alt', 'content'].forEach((attribute) => {
+document.querySelectorAll('[aria-label], img[alt], meta[name="description"], input[placeholder]').forEach((element) => {
+  ['aria-label', 'alt', 'content', 'placeholder'].forEach((attribute) => {
     if (element.hasAttribute(attribute)) translatedAttributes.push({ element, attribute, source: element.getAttribute(attribute) });
   });
 });
