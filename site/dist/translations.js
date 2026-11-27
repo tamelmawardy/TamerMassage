@@ -235,6 +235,12 @@ function setLanguage(language) {
   });
   translatedAttributes.forEach(({ element, attribute, source }) => element.setAttribute(attribute, translate(source)));
   document.title = translate(originalTitle);
+  const canonical = document.getElementById('canonical');
+  if (canonical) {
+    const canonicalUrl = new URL('https://tamelmawardy.github.io/TamerMassage/');
+    if (currentLanguage !== 'ru') canonicalUrl.searchParams.set('lang', currentLanguage);
+    canonical.href = canonicalUrl.href;
+  }
   const selectedLanguage = languageButtons.find((button) => button.dataset.language === currentLanguage);
   languageSelect.querySelector('.language-flag').src = selectedLanguage.querySelector('img').getAttribute('src');
   const languageName = languageSelect.querySelector('.language-name');
@@ -247,6 +253,12 @@ function setLanguage(language) {
   window.refreshQuiz?.();
   window.fixPriceSpacing?.();
   try { localStorage.setItem('tamer-language', currentLanguage); } catch { /* Storage may be disabled. */ }
+  try {
+    const url = new URL(location.href);
+    if (currentLanguage === 'ru') url.searchParams.delete('lang');
+    else url.searchParams.set('lang', currentLanguage);
+    history.replaceState(null, '', url);
+  } catch { /* History may be unavailable. */ }
 }
 
 languageSelect.addEventListener('click', () => {
@@ -281,4 +293,8 @@ languagePicker.addEventListener('focusout', (event) => {
 });
 let savedLanguage = 'ru';
 try { savedLanguage = localStorage.getItem('tamer-language') || 'ru'; } catch { /* Russian remains the default. */ }
+try {
+  const requested = new URLSearchParams(location.search).get('lang');
+  if (['ru', 'en', 'ar'].includes(requested)) savedLanguage = requested;
+} catch { /* Keep the saved language. */ }
 setLanguage(savedLanguage);
